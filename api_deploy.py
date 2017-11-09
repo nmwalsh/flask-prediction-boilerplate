@@ -14,27 +14,15 @@ import os
 import pickle
 import xgboost as xgb
 import sys
+from .Flask_Classifier_Boilerplate import predict
 
-def predict(params):
-    model_filename = os.path.join('model.dat')
-    # load model from file
-    loaded_model = pickle.load(open(model_filename, "rb"))
-    X = params 
-    x_test = pd.DataFrame(X)
-    x_test.sort_index(axis=1,inplace=True)
-    x_test = xgb.DMatrix(x_test)
-    y_pred = loaded_model.predict(x_test)
-    prob = y_pred[0]
-    y_pred[y_pred > 0.5] = 1
-    y_pred[y_pred <= 0.5] = 0
-    return {'class':int(y_pred[0]),'prob':float(prob)}
 
-post_functions_list = [add, predict]
-get_functions_list = [test]
+
 app = Flask(__name__)
 
 @app.route('/<func_name>', methods=['POST'])
 def api_post(func_name):
+    post_functions_list = [add, predict]
     for function in post_functions_list:
         if function.__name__ == func_name:
             try:
@@ -51,6 +39,7 @@ def api_post(func_name):
 
 @app.route('/<func_name>', methods=['GET'])
 def api_get(func_name):
+    get_functions_list = [test]
     for function in get_functions_list:
         if function.__name__ == func_name:
             try:
